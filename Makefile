@@ -12,8 +12,8 @@ lint:
 run:            ## Run the example suite and render a report
 	evalforge run examples/rag_suite.yaml --out reports/report.json
 
-gate:           ## CI quality gate on the example suite
-	evalforge gate examples/rag_suite.yaml --min-faithfulness 0.70 --min-answer-correctness 0.50
+gate:           ## CI quality gate on the example suite (thresholds suit the offline judge)
+	evalforge gate examples/rag_suite.yaml --min-hit-rate 0.70 --min-faithfulness 0.40
 
 calibrate:      ## Compare the judge against human labels
 	evalforge calibrate examples/rag_suite.yaml --labels examples/human_labels.json

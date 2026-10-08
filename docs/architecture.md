@@ -49,10 +49,10 @@ The runner then averages each metric over all cases to get the aggregate scores.
 `EvalRunner` does not know which judge it uses. It depends on the `Judge` protocol in
 `judges/base.py`:
 
-```
-Judge (Protocol)
-├── DeterministicJudge   # offline, lexical (TF-IDF + token F1)
-└── LLMJudge             # provider-agnostic cascade (Anthropic/OpenAI/Gemini/DeepSeek/Ollama)
+```mermaid
+flowchart TD
+    A["Judge (Protocol)"] --> B["DeterministicJudge<br/>offline, lexical — TF-IDF + token F1"]
+    A --> C["LLMJudge<br/>provider-agnostic cascade — Anthropic/OpenAI/Gemini/DeepSeek/Ollama"]
 ```
 
 This has two benefits. First, every test runs with the deterministic judge, so the test

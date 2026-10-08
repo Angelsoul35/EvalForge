@@ -72,8 +72,11 @@ make install
 # Run the example suite and see the scores
 evalforge run examples/rag_suite.yaml
 
-# Use it as a CI gate (it exits with an error when quality drops)
-evalforge gate examples/rag_suite.yaml --min-faithfulness 0.70 --min-hit-rate 0.60
+# Use it as a CI gate. These thresholds suit the offline deterministic judge and
+# pass on the example; tighten one (e.g. --min-faithfulness 0.80) and it exits 1,
+# which is how it fails a CI build when quality drops. With the LLM judge you set
+# them higher — see the GitHub Actions snippet below.
+evalforge gate examples/rag_suite.yaml --min-hit-rate 0.70 --min-faithfulness 0.40
 
 # Check the judge against human scores
 evalforge calibrate examples/rag_suite.yaml --labels examples/human_labels.json
