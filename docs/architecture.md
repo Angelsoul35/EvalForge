@@ -11,7 +11,7 @@ trust, and that can block a bad change in CI.
 |---|---|---|
 | Data model | `schemas.py` | `Suite`, `EvalCase`, `SuiteReport` as pydantic models |
 | Metrics | `metrics/` | Retrieval metrics (from labels) and lexical similarity |
-| Judges | `judges/` | The `Judge` interface, a deterministic judge, an Anthropic judge |
+| Judges | `judges/` | The `Judge` interface, a deterministic judge, a provider-agnostic LLM judge |
 | Runner | `runner.py` | Runs a suite and returns a report |
 | Gate | `gate.py` | Fails CI when a metric is below its threshold |
 | Calibration | `calibrate.py` | Compares judge scores with human scores |
@@ -52,12 +52,12 @@ The runner then averages each metric over all cases to get the aggregate scores.
 ```
 Judge (Protocol)
 ├── DeterministicJudge   # offline, lexical (TF-IDF + token F1)
-└── AnthropicJudge       # Anthropic API, stronger on nuance
+└── LLMJudge             # provider-agnostic cascade (Anthropic/OpenAI/Gemini/DeepSeek/Ollama)
 ```
 
 This has two benefits. First, every test runs with the deterministic judge, so the test
 suite needs no API key and no network. Second, you can start with the cheap judge and
-move to the Anthropic judge only where you need it — the code change is one flag.
+move to the LLM judge only where you need it — the code change is one flag.
 
 ## Why calibration matters
 
@@ -79,5 +79,5 @@ fails the pull request.
 ## Configuration
 
 Settings use the `EF_` prefix (see `.env.example`): the judge, the similarity threshold
-for the faithfulness check, and whether to emit OpenTelemetry spans. The Anthropic judge
+for the faithfulness check, and whether to emit OpenTelemetry spans. The LLM judge
 reads `ANTHROPIC_API_KEY` from the environment.

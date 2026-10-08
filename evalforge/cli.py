@@ -18,17 +18,25 @@ from evalforge.suites.loader import load_suite
 app = typer.Typer(help="EvalForge — evaluation harness for RAG/LLM systems.", add_completion=False)
 console = Console()
 
+_JUDGE_HELP = "deterministic | llm"
+_PROVIDERS_HELP = "LLM provider cascade for --judge llm, e.g. 'anthropic,openai,ollama'"
+
+
+def _judge(name: str, providers: str):
+    return build_judge(name, provider_spec=providers or None)
+
 
 @app.command()
 def run(
     suite: str = typer.Argument(..., help="Path to a suite (.yaml/.json)"),
-    judge: str = typer.Option("deterministic", help="deterministic | anthropic"),
+    judge: str = typer.Option("deterministic", help=_JUDGE_HELP),
+    providers: str = typer.Option("", help=_PROVIDERS_HELP),
     out: str | None = typer.Option(None, help="Write the JSON report here"),
     markdown: str | None = typer.Option(None, help="Write a Markdown report here"),
     otel: bool = typer.Option(False, help="Emit OpenTelemetry spans to the console"),
 ) -> None:
     """Run a suite and print the aggregate scores."""
-    report = EvalRunner(build_judge(judge), otel_enabled=otel).run(load_suite(suite))
+    report = EvalRunner(_judge(judge, providers), otel_enabled=otel).run(load_suite(suite))
     render_console(report, console)
     if out:
         console.print(f"[dim]wrote {save_json(report, out)}[/dim]")
@@ -40,7 +48,8 @@ def run(
 @app.command()
 def gate(
     suite: str = typer.Argument(...),
-    judge: str = typer.Option("deterministic"),
+    judge: str = typer.Option("deterministic", help=_JUDGE_HELP),
+    providers: str = typer.Option("", help=_PROVIDERS_HELP),
     min_faithfulness: float = typer.Option(0.0),
     min_answer_relevance: float = typer.Option(0.0),
     min_answer_correctness: float = typer.Option(0.0),
@@ -56,7 +65,7 @@ def gate(
         "hit_rate": min_hit_rate,
     }
     thresholds = {k: v for k, v in thresholds.items() if v > 0}
-    report = EvalRunner(build_judge(judge)).run(load_suite(suite))
+    report = EvalRunner(_judge(judge, providers)).run(load_suite(suite))
     render_console(report, console)
     result = evaluate_gate(report, thresholds)
     if result.passed:
@@ -72,11 +81,12 @@ def gate(
 def calibrate_command(
     suite: str = typer.Argument(...),
     labels: str = typer.Option(..., help="JSON of {case_id: {metric: human_score}}"),
-    judge: str = typer.Option("deterministic"),
+    judge: str = typer.Option("deterministic", help=_JUDGE_HELP),
+    providers: str = typer.Option("", help=_PROVIDERS_HELP),
 ) -> None:
     """Compare the judge against human labels (correlation + MAE)."""
     human = json.loads(Path(labels).read_text())
-    report = EvalRunner(build_judge(judge)).run(load_suite(suite))
+    report = EvalRunner(_judge(judge, providers)).run(load_suite(suite))
     results = calibrate(report, human)
     if not results:
         console.print("[yellow]No overlapping case/metric labels to calibrate against.[/yellow]")

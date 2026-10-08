@@ -12,8 +12,9 @@ free, offline, and repeatable.
 ## Decision
 
 The default judge is deterministic. It uses lexical methods (TF-IDF cosine similarity
-and token F1). The Anthropic judge is available behind the same interface for cases that
-need real semantic judgement, and you choose it with one flag.
+and token F1). The LLM judge is available behind the same interface for cases that need real
+semantic judgement. It is provider-agnostic (a cascade over Anthropic, OpenAI, Gemini,
+DeepSeek, or a local Ollama model), and you choose it with one flag.
 
 ## Consequences
 

@@ -22,7 +22,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-anthropic = ["anthropic>=0.40"]
 api = ["fastapi>=0.115", "uvicorn[standard]>=0.34"]
 dev = ["pytest>=8.3", "pytest-cov>=6.0", "ruff>=0.8", "httpx>=0.28"]
 

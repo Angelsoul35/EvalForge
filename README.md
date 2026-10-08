@@ -52,11 +52,16 @@ EvalForge gives you three things:
 | Judge | When to use it |
 |---|---|
 | `deterministic` (default) | Offline, free, and repeatable. It uses lexical scoring (TF-IDF and token F1). Good for tests, CI, and learning. |
-| `anthropic` | A stronger judge that uses the Anthropic API (`claude-sonnet-5-5` by default). Install it with `pip install 'evalforge[anthropic]'`. |
+| `llm` | A stronger LLM-as-judge. It is **provider-agnostic**: it runs a cascade over several providers (Anthropic, OpenAI, Gemini, DeepSeek, or a local Ollama model) and falls back to the next one if one fails. Set `--providers` or `EF_LLM_PROVIDERS`. |
 
 Both judges use the same interface, so you switch them with one flag. **Do not trust a
 judge you have not measured.** `evalforge calibrate` shows how well the judge agrees
 with people.
+
+```bash
+# Use the LLM judge with a provider cascade (first one that works wins)
+evalforge run suites/hard.yaml --judge llm --providers anthropic,openai,ollama
+```
 
 ## Quickstart
 
@@ -84,7 +89,7 @@ answer_relevance   (n=5): pearson=0.732  spearman=0.359  mae=0.504
 
 The lexical judge matches human faithfulness scores very well, but it is weaker on
 relevance. That is exactly why calibration exists: it tells you when to trust the cheap
-judge and when to use the Anthropic judge instead.
+judge and when to use the LLM judge instead.
 
 ## A suite
 
@@ -123,7 +128,7 @@ prompt or retriever change that drops quality fails the pull request.
 evalforge/
   schemas.py     Suite / EvalCase / SuiteReport (pydantic models)
   metrics/       retrieval metrics (label-based) and lexical similarity
-  judges/        the Judge interface, the deterministic judge, the Anthropic judge
+  judges/        the Judge interface, the deterministic judge, the LLM judge
   runner.py      runs a suite and returns a SuiteReport
   gate.py        the threshold gate for CI
   calibrate.py   judge-vs-human correlation and error
@@ -153,7 +158,7 @@ make demo   # run + gate + calibrate on the example suite
 
 The default judge is **lexical**, not semantic. It is repeatable and free, but a
 paraphrase or a fluent wrong answer that reuses words from the context can fool it. For
-harder suites, calibrate first and then use the Anthropic judge. Also, EvalForge
+harder suites, calibrate first and then use the LLM judge. Also, EvalForge
 *measures* quality; it does not fix it. Use it next to your own work on retrieval and
 prompts.
 

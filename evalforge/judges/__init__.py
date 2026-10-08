@@ -9,15 +9,16 @@ __all__ = ["GENERATION_METRICS", "Judge", "DeterministicJudge", "build_judge"]
 
 
 def build_judge(name: str, **kwargs) -> Judge:
-    """Construct a judge by name: ``deterministic`` or ``anthropic``."""
-    if name == "deterministic":
-        threshold = kwargs.get("similarity_threshold", 0.30)
-        return DeterministicJudge(similarity_threshold=threshold)
-    if name == "anthropic":
-        from evalforge.judges.anthropic import AnthropicJudge
+    """Construct a judge by name.
 
-        return AnthropicJudge(
-            model=kwargs.get("model", "claude-sonnet-5-5"),
-            api_key=kwargs.get("api_key"),
-        )
-    raise ValueError(f"unknown judge: {name!r} (use 'deterministic' or 'anthropic')")
+    * ``deterministic`` — offline, lexical (the default).
+    * ``llm`` — provider-agnostic LLM-as-judge over a cascade of providers
+      (configure the order with ``provider_spec``, e.g. ``anthropic,openai,ollama``).
+    """
+    if name == "deterministic":
+        return DeterministicJudge(similarity_threshold=kwargs.get("similarity_threshold", 0.30))
+    if name == "llm":
+        from evalforge.judges.llm import LLMJudge
+
+        return LLMJudge(llm=kwargs.get("llm"), provider_spec=kwargs.get("provider_spec"))
+    raise ValueError(f"unknown judge: {name!r} (use 'deterministic' or 'llm')")

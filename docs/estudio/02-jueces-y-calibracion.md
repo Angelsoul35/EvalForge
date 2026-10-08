@@ -27,19 +27,23 @@ léxicos. Es gratis, funciona sin internet y da siempre el mismo resultado.
 > **Concepto — F1 de tokens.** Mezcla precisión y recall a nivel de palabras. Es una
 > forma simple y clásica (estilo SQuAD) de medir si dos textos dicen casi lo mismo.
 
-### Juez Anthropic (opcional)
+### Juez LLM (opcional, agnóstico de proveedor)
 
-Está en `evalforge/judges/anthropic.py`. Usa la API de Anthropic (por defecto
-`claude-sonnet-5-5`, que es el modelo recomendado para un rol de evaluador secundario).
-Le pide al modelo una puntuación en JSON con una rúbrica por métrica. Es más fuerte en
-matices (entiende paráfrasis), pero cuesta dinero y necesita clave de API.
+Está en `evalforge/judges/llm.py`. No depende de un proveedor fijo: usa una **cascada**
+de proveedores (`evalforge/llm/`) y cae al siguiente si uno falla. Soporta Anthropic,
+OpenAI, Gemini, DeepSeek y modelos locales open-source vía Ollama. Le pide al modelo una
+puntuación en JSON con una rúbrica por métrica. Es más fuerte en matices (entiende
+paráfrasis), pero cuesta dinero y necesita clave de API (salvo el local).
 
-Se instala aparte: `pip install 'evalforge[anthropic]'`.
+El orden de la cascada se configura con `EF_LLM_PROVIDERS` o `--providers`, por ejemplo
+`anthropic,openai,ollama`. Cada proveedor lee su propia clave del entorno. Esto es
+**orquestación multi-LLM**: resiliencia (si un proveedor cae, sigues) y libertad de
+preferir un modelo barato o local primero.
 
 ## Por qué el juez por defecto es determinista
 
 Las pruebas y el CI necesitan algo gratis, offline y repetible. Si cada corrida diera un
-número distinto, no podrías comparar. Por eso el default es el léxico, y el de Anthropic
+número distinto, no podrías comparar. Por eso el default es el léxico, y el juez LLM
 queda detrás de la misma interfaz para cuando haga falta. (Ver
 [ADR-0003](../adr/0003-deterministic-judge-by-default.md).)
 
@@ -62,7 +66,7 @@ En el ejemplo del proyecto, el juez léxico da:
 ```
 faithfulness       pearson=0.997   <- casi perfecto: confiable para fidelidad
 answer_correctness pearson=0.991
-answer_relevance   pearson=0.732   <- más débil: aquí conviene el juez Anthropic
+answer_relevance   pearson=0.732   <- más débil: aquí conviene el juez LLM
 ```
 
 Esto enseña la lección clave: no basta con tener una métrica automática; hay que
