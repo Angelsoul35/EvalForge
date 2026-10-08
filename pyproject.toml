@@ -1,0 +1,48 @@
+[project]
+name = "evalforge"
+version = "1.0.0"
+description = "An evaluation and observability harness for RAG and LLM systems: retrieval and generation metrics, LLM-as-judge with calibration, and a CI quality gate."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Angelo David Padilla Romero" }]
+
+dependencies = [
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "pandas>=2.2",
+  "numpy>=2.1",
+  "scikit-learn>=1.5",
+  "pyyaml>=6.0",
+  "rich>=13.9",
+  "typer>=0.15",
+  "httpx>=0.28",
+  "opentelemetry-sdk>=1.29",
+  "opentelemetry-api>=1.29",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.40"]
+api = ["fastapi>=0.115", "uvicorn[standard]>=0.34"]
+dev = ["pytest>=8.3", "pytest-cov>=6.0", "ruff>=0.8", "httpx>=0.28"]
+
+[project.scripts]
+evalforge = "evalforge.cli:app"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["evalforge*"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]

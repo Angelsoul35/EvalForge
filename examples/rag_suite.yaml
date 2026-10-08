@@ -1,0 +1,62 @@
+name: demo-rag-suite
+description: >
+  A small, self-contained RAG evaluation suite. Each case isolates a different
+  failure mode so the metrics visibly move: a clean case, a partial
+  hallucination, an off-topic answer, and a retrieval failure.
+cases:
+  - id: c1-clean
+    question: What is the capital of France and its most famous landmark?
+    answer: The capital of France is Paris, home to the Eiffel Tower.
+    ground_truth: Paris is the capital of France, and the Eiffel Tower is its landmark.
+    total_relevant: 2
+    contexts:
+      - text: Paris is the capital of France.
+        relevant: true
+      - text: The Eiffel Tower is a famous landmark located in Paris.
+        relevant: true
+      - text: Bananas are a good source of potassium.
+        relevant: false
+
+  - id: c2-partial-hallucination
+    question: What is the capital of Japan?
+    answer: >
+      The capital of Japan is Tokyo. It has a population of exactly 37 million
+      people and the national flower is the cherry blossom.
+    ground_truth: Tokyo is the capital of Japan.
+    total_relevant: 1
+    contexts:
+      - text: Tokyo is the capital of Japan.
+        relevant: true
+      - text: The Great Wall of China is visible from low orbit on a clear day.
+        relevant: false
+
+  - id: c3-off-topic
+    question: What is the tallest mountain on Earth?
+    answer: I really enjoy hiking on the weekends and drinking a good coffee.
+    ground_truth: Mount Everest is the tallest mountain on Earth.
+    total_relevant: 1
+    contexts:
+      - text: Mount Everest is the tallest mountain on Earth at 8,849 meters.
+        relevant: true
+
+  - id: c4-retrieval-miss
+    question: In what year did the first crewed Moon landing happen?
+    answer: The first crewed Moon landing happened in 1969 during Apollo 11.
+    ground_truth: 1969, during the Apollo 11 mission.
+    total_relevant: 1
+    contexts:
+      - text: This recipe calls for two cups of flour and one egg.
+        relevant: false
+      - text: Cats are among the most popular household pets worldwide.
+        relevant: false
+
+  - id: c5-clean
+    question: Who wrote the play Romeo and Juliet?
+    answer: Romeo and Juliet was written by William Shakespeare.
+    ground_truth: William Shakespeare wrote Romeo and Juliet.
+    total_relevant: 1
+    contexts:
+      - text: Romeo and Juliet is a tragedy written by William Shakespeare.
+        relevant: true
+      - text: Photosynthesis converts sunlight into chemical energy in plants.
+        relevant: false

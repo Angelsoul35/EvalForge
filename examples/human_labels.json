@@ -1,0 +1,7 @@
+{
+  "c1-clean":                 {"faithfulness": 1.0, "answer_relevance": 0.95, "answer_correctness": 1.0},
+  "c2-partial-hallucination": {"faithfulness": 0.5, "answer_relevance": 0.85, "answer_correctness": 0.6},
+  "c3-off-topic":             {"faithfulness": 0.0, "answer_relevance": 0.05, "answer_correctness": 0.0},
+  "c4-retrieval-miss":        {"faithfulness": 0.1, "answer_relevance": 0.9,  "answer_correctness": 0.9},
+  "c5-clean":                 {"faithfulness": 1.0, "answer_relevance": 0.9,  "answer_correctness": 1.0}
+}
