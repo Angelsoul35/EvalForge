@@ -11,8 +11,13 @@ from evalforge.runner import EvalRunner
 def test_runner_produces_all_metrics(example_suite):
     report = EvalRunner(DeterministicJudge()).run(example_suite)
     assert report.n_cases == 5
-    for metric in ["hit_rate", "context_precision", "faithfulness", "answer_relevance",
-                   "answer_correctness"]:
+    for metric in [
+        "hit_rate",
+        "context_precision",
+        "faithfulness",
+        "answer_relevance",
+        "answer_correctness",
+    ]:
         assert metric in report.aggregates
 
 

@@ -26,6 +26,7 @@ El `EvalRunner` no depende de un juez concreto; depende del `Protocol` `Judge`:
 ```python
 class Judge(Protocol):
     name: str
+
     def score(self, case: EvalCase, metric: str) -> MetricScore: ...
 ```
 
