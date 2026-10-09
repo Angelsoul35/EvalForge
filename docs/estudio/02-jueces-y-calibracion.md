@@ -72,3 +72,43 @@ answer_relevance   pearson=0.732   <- más débil: aquí conviene el juez LLM
 Esto enseña la lección clave: no basta con tener una métrica automática; hay que
 **demostrar** que coincide con el juicio humano antes de confiar en ella. (Ver
 [ADR-0004](../adr/0004-calibrate-the-judge.md).)
+
+## Validación con datos reales: RAGTruth
+
+La calibración de arriba usa las etiquetas del *suite* de ejemplo. La prueba de fuego es
+dato **real y etiquetado por humanos**: **RAGTruth**, un benchmark de alucinaciones en
+RAG (respuestas reales de LLM sobre pares (pregunta, contexto) reales, con anotaciones
+humanas que marcan el contenido alucinado). Se vendorea un subconjunto balanceado de
+1000 filas (500 fieles / 500 no fieles) en `datasets/ragtruth.jsonl`. La etiqueta binaria
+se **deriva** de la anotación humana: no fiel (0) si hay cualquier marca de alucinación
+(un span o un conteo `evident_conflict`/`baseless_info` > 0), fiel (1) solo si todo está
+limpio.
+
+Con `python -m evalforge.real_benchmark`:
+
+```
+ROC-AUC real        : 0.598   accuracy 0.589
+control etiquetas barajadas : 0.518   (-> ~azar)
+control contexto aleatorio  : 0.496   (-> ~azar)
+```
+
+### Por qué el número modesto es, aquí, la demostración
+
+RAGTruth es el benchmark **más difícil**: sus alucinaciones son ediciones sutiles
+*dentro* del contexto (un dato falso insertado), no respuestas obviamente desconectadas.
+Un juez **léxico** (coseno TF-IDF entre respuesta y contexto) detecta eso por encima del
+azar (AUC ≈ 0,60), gratis y sin red, pero no llega a 1,0 — y eso es correcto, no un
+defecto.
+
+Lo importante no es el número alto, es **medirlo**. Los dos controles lo validan:
+
+- **Etiquetas barajadas → AUC 0,52.** Si el juez "acertara" con etiquetas aleatorias,
+  estaría midiendo fuga, no señal. Colapsa al azar, así que la señal es real.
+- **Contexto aleatorio → AUC 0,50.** Emparejar cada respuesta con un contexto ajeno
+  destruye la discriminación: el juez sí usa el *grounding* real, no el estilo del texto.
+
+Ese es justo el propósito de EvalForge: te dice **exactamente** dónde está tu juez gratis
+frente a humanos reales, para que sepas cuándo basta el léxico y cuándo calibrar o pasar
+al juez LLM (misma interfaz). **Conocer el número es la capacidad.** La métrica
+determinista ROC-AUC se define `AUC = P(score(fiel) > score(no fiel))` sobre todos los
+pares — por eso es independiente del umbral y la reportamos como titular.

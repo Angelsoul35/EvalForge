@@ -40,7 +40,7 @@ es baja, no confío en esa métrica para esa compuerta.
 **¿Qué diferencia hay entre Pearson y Spearman aquí?**
 Pearson mide relación lineal entre las puntuaciones; Spearman mide si coinciden en el
 orden. Un juez puede ordenar bien (Spearman alto) aunque sus valores estén corridos
-(MAE alto). Mirar los dos da una imagen más honesta.
+(MAE alto). Mirar los dos da una imagen más completa.
 
 ## Nivel senior / diseño
 

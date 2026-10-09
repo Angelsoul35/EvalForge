@@ -144,10 +144,44 @@ The judge is an interface (`judges/base.py`), so the two judges are easy to swap
 new one is easy to add. See [`docs/architecture.md`](docs/architecture.md), the
 [ADRs](docs/adr/), and the Spanish study guide in [`docs/estudio/`](docs/estudio/).
 
+## Validated on real human hallucination labels (RAGTruth)
+
+EvalForge's promise is that you don't *trust* a judge, you *measure* it against human
+scores. To show that on real data, the deterministic judge is benchmarked against
+**RAGTruth** — a human-annotated hallucination benchmark of real LLM responses to real
+(query, context) pairs. A balanced 1,000-row subset (500 faithful / 500 unfaithful) is
+vendored under `datasets/ragtruth.jsonl` (see `datasets/README.md`); the binary label is
+derived from the human annotations. Run `python -m evalforge.real_benchmark`:
+
+```
+Real discrimination (faithfulness judge vs the human labels)
+  ROC-AUC            : 0.598      accuracy: 0.589   F1(faithful): 0.484
+
+Negative controls (the signal is real only if these collapse to ~0.5)
+  AUC, labels shuffled : 0.518
+  AUC, random context  : 0.496
+
+Result: the free deterministic judge detects real hallucinations above chance,
+and the controls confirm that discrimination is real grounding signal.
+```
+
+The point is not a big number — it is the **measurement**. On RAGTruth, the field's
+hardest hallucination set (its hallucinations are subtle, in-context edits, not obvious
+mismatches), the zero-cost, offline, deterministic lexical judge detects real
+hallucinations **above chance** (ROC-AUC ~0.60), and the two controls prove that
+discrimination is real grounding signal — it collapses to ~0.5 under shuffled labels and
+under a random context. That is EvalForge doing exactly what it exists for: it tells you
+precisely where your free judge stands against real humans, so you know when the lexical
+judge is enough and when to `calibrate` it or switch to the LLM judge (same interface)
+for a higher ceiling. Knowing the number *is* the capability. (`tests/test_real_benchmark.py`
+asserts the real discrimination clears the controls and that the label derivation is
+correct.)
+
 ## Testing and quality
 
-* **31 tests** cover the metrics, the judge, the runner, the gate, calibration, the
-  loader, and the CLI.
+* **40 tests** cover the metrics, the judge, the runner, the gate, calibration, the
+  loader, the CLI, and the **real RAGTruth benchmark** (balanced-subset load, label
+  derivation, discrimination above both controls, and the fetch path).
 * CI checks coverage (at least 80%), runs `ruff` for lint, and runs `bandit` and
   `gitleaks` for security.
 
@@ -157,7 +191,7 @@ make lint   # ruff
 make demo   # run + gate + calibrate on the example suite
 ```
 
-## Honest limits
+## Limits
 
 The default judge is **lexical**, not semantic. It is repeatable and free, but a
 paraphrase or a fluent wrong answer that reuses words from the context can fool it. For

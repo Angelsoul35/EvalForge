@@ -21,5 +21,5 @@ DeepSeek, or a local Ollama model), and you choose it with one flag.
 * **Good:** the whole test suite runs offline with no key; results do not change between
   runs; new users can try the tool at once.
 * **Cost:** the lexical judge can be fooled by paraphrase or by a fluent wrong answer.
-  We are honest about this in the README, and `calibrate` measures it so you know when
+  We state this plainly in the README, and `calibrate` measures it so you know when
   to switch judges.

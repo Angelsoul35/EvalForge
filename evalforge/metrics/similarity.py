@@ -3,7 +3,7 @@
 It is a TF-IDF cosine similarity over word n-grams. It is deterministic and
 needs no model download and no network, so the whole tool runs and is tested
 offline. This is lexical, not semantic: you could later plug in real embeddings
-behind the same functions, but the default is honest about what it does.
+behind the same functions, but the default is explicit about what it does.
 """
 
 from __future__ import annotations
